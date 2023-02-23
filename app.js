@@ -42,8 +42,7 @@ app.get("/players/", async (request, response) => {
     player_id`;
 
   const dbResponse = await db.all(getPlayersQuery);
-  const ResObj = convertDbToResObj(dbResponse)
-  response.send(ResObj);
+  response.send(dbResponse.map((eachPlayer) => convertDbToResObj(eachPlayer)));
 });
 
 app.post("/players/", async (request, response) => {
@@ -67,7 +66,7 @@ app.get("/players/:playerId/", async (request, response) => {
     FROM cricket_team
     WHERE player_id = ${playerId};`;
   let dbResponse = await db.get(getPlayerQuery);
-  response.send(dbResponse);
+  response.send(convertDbToResObj(dbResponse));
 });
 
 app.put("/players/:playerId/", async (request, response) => {
