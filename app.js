@@ -23,6 +23,15 @@ const initializeDbAndServer = async () => {
 };
 initializeDbAndServer();
 
+function convertDbToResObj(dbObj) {
+    return {
+        playerId = dbObj.player_id,
+        playerName = dbObj.player_name,
+        jerseyNumber = dbObj.jersey_number,
+        role = dbObj.role
+    };
+};
+
 app.get("/players/", async (request, response) => {
   const getPlayersQuery = `
     SELECT 
@@ -33,7 +42,8 @@ app.get("/players/", async (request, response) => {
     player_id`;
 
   const dbResponse = await db.all(getPlayersQuery);
-  response.send(dbResponse);
+  const ResObj = convertDbToResObj(dbResponse)
+  response.send(ResObj);
 });
 
 app.post("/players/", async (request, response) => {
@@ -41,7 +51,7 @@ app.post("/players/", async (request, response) => {
   const { playerName, jerseyNumber, role } = playersDetails;
   const createPlayerQuery = `
     INSERT INTO
-    cricket_team (playerName, jerseyNumber, role)
+    cricket_team (player_name, jersey_number, role)
     VALUES
     ${playerName},
     ${jerseyNumber},
@@ -68,8 +78,8 @@ app.put("/players/:playerId/", async (request, response) => {
     UPDATE 
     cricket_team
     SET
-    playerName = '${playerName}',
-    jerseyNumber = '${jerseyNumber}',
+    player_name = '${playerName}',
+    jersey_number = '${jerseyNumber}',
     role = '${role}'
     WHERE
     player_id = ${playerId};
@@ -81,8 +91,7 @@ app.put("/players/:playerId/", async (request, response) => {
 app.delete("/players/:playerId/", async (request, response) => {
   const { playerId } = request.params;
   const deletePlayerQuery = `
-    DELETE 
-    FROM
+    DELETE FROM
     cricket_team
     WHERE
     player_id = ${playerId};`;
