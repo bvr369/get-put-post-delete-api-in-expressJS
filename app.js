@@ -23,26 +23,26 @@ const initializeDbAndServer = async () => {
 };
 initializeDbAndServer();
 
-function convertDbToResObj(dbObj) {
-    return {
-        playerId = dbObj.player_id,
-        playerName = dbObj.player_name,
-        jerseyNumber = dbObj.jersey_number,
-        role = dbObj.role
-    };
-};
+function convertDbObjectToResponseObject(dbObj) {
+  return {
+    playerId: dbObj.player_id,
+    playerName: dbObj.player_name,
+    jerseyNumber: dbObj.jersey_number,
+    role: dbObj.role,
+  };
+}
 
 app.get("/players/", async (request, response) => {
   const getPlayersQuery = `
     SELECT 
     *
     FROM
-    cricket_team
-    ORDER BY
-    player_id`;
+    cricket_team`;
 
   const dbResponse = await db.all(getPlayersQuery);
-  response.send(dbResponse.map((eachPlayer) => convertDbToResObj(eachPlayer)));
+  response.send(
+    dbResponse.map((eachPlayer) => convertDbObjectToResponseObject(eachPlayer))
+  );
 });
 
 app.post("/players/", async (request, response) => {
@@ -52,9 +52,9 @@ app.post("/players/", async (request, response) => {
     INSERT INTO
     cricket_team (player_name, jersey_number, role)
     VALUES
-    ${playerName},
+    ('${playerName}',
     ${jerseyNumber},
-    ${role};`;
+    '${role}');`;
   await db.run(createPlayerQuery);
   response.send("Player Added to Team");
 });
@@ -66,7 +66,7 @@ app.get("/players/:playerId/", async (request, response) => {
     FROM cricket_team
     WHERE player_id = ${playerId};`;
   let dbResponse = await db.get(getPlayerQuery);
-  response.send(convertDbToResObj(dbResponse));
+  response.send(convertDbObjectToResponseObject(dbResponse));
 });
 
 app.put("/players/:playerId/", async (request, response) => {
